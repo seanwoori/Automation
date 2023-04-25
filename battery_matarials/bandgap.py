@@ -13,25 +13,25 @@ mpr = MPRester(api_key)
 
 # 전기화학적 안정성(electrochemical stability)이 높은 물질들을 요청
 criteria = {"icsd_ids": {"$exists": True}, "e_above_hull": {"$lt": 0.1}, "band_gap": {"$gt": 2}, "unit_cell_formula": {"$exists": True}, "pretty_formula": {"$exists": True}}
-properties = ["material_id", "pretty_formula", "formation_energy_per_atom", "energy_per_atom", "band_gap", "total_magnetization", "volume", "density", "icsd_ids"]
-data = mpr.query(criteria=criteria, properties=properties, max_tries_per_chunk=3)
+properties = ["material_id", "pretty_formula", "formation_energy_per_atom", "energy_per_atom", "band_gap", "total_magnetization", "volume", "density"]
+data = mpr.summary.search(criteria=criteria, property=properties)
 
 # Materials Project Compatibility 객체 생성
 compat = MaterialsProjectCompatibility()
 
 # 배터리 물질들의 formula를 가져오기 위한 query 작성
 # Mongodb type query가 필요
-query = {"elements": {"$in": ["Li", "Na", "K", "Mg", "Ca", "Zn", "Al", "Ti", "Fe", "Co", "Ni", "Cu"]},
-         "nelements": {"$lte": 3},
-         "spacegroup.number": {"$lte": 230},
-         "energy_per_atom": {"$lte": 0},
-         "band_gap": {"$gte": 0.5},
-         "icsd_ids": {"$exists": False},
-         "anonymous_formula": {"$nin": ["A", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10", "A11", "A12"]},
-         "deprecated": False}
+query = {
+    'task_ids': {'$in': ['mp-33787', 'mp-2550', 'mp-540786', 'mp-5827', 'mp-568345', 'mp-554444']},
+    'nelements': {'$lte': 4},
+    'energy_above_hull': {'$lte': 0.1},
+    'band_gap': {'$gte': 1},
+    'elements': {'$all': ['Li', 'Mn', 'O']},
+    'icsd_ids': {'$exists': False},
+}
 
 # MPRester를 사용하여 query에 해당하는 물질들의 정보 fetch
-results = mpr.summary.search(criteria=query, properties=["task_id", "pretty_formula", "spacegroup.symbol", "formation_energy_per_atom", "band_gap"])
+results = mpr.summary.search(query, ["task_id", "pretty_formula", "e_above_hull", "band_gap"])
 
 # 가져온 물질들의 formation energy per atom과 band gap을 Materials Project Compatibility를 사용하여 보정
 entries = []
@@ -56,3 +56,4 @@ plt.show()
 # 가져온 물질들의 formation energy per atom과 band gap을 출력
 for e in entries:
     print("{}: formation_energy_per_atom = {:.4f}, band_gap = {:.4f}".format(e.entry_id, e.energy_per_atom, e.band_gap))
+
