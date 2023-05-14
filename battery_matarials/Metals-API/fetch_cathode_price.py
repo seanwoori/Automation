@@ -4,12 +4,10 @@ import json
 api_key = "Insert_API_KEY"
 
 anode_materials = {
-    "LCO": "CO",
-    "LMO": "NI",
-    "LNO": "MN",
-    "NCM": "FE",
-    "NCA": "FE",
-    "LFP": "LI"
+    "LCO": ["LI","CO",2*"O"],
+    "LMO": ["LI","NI",2*"O"],
+    "LNO": ["LI",2*"MN",2*"O"],
+    "LFP": ["LI","FE","P",4*"O"],
 }
 
 def create_url(symbols):
@@ -19,13 +17,11 @@ print("다음 중 양극재를 선택하세요:")
 print("1. LCO")
 print("2. LMO")
 print("3. LNO")
-print("4. NCM")
-print("5. NCA")
-print("6. LFP")
+print("4. LFP")
 
 choice = int(input("선택: "))
 
-if choice < 1 or choice > 6:
+if choice < 1 or choice > 4:
     print("잘못된 선택입니다.")
 else:
     symbol = anode_materials[list(anode_materials.keys())[choice - 1]]
