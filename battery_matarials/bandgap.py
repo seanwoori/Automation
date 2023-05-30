@@ -3,7 +3,7 @@ from pymatgen.entries.compatibility import MaterialsProjectCompatibility
 from pymatgen.analysis.phase_diagram import PhaseDiagram, PDPlotter
 import matplotlib.pyplot as plt
 import numpy as np
-import settings 
+import settings
 
 # Materials Project API Key 입력
 api_key = settings.MPR_API
@@ -16,11 +16,10 @@ criteria = {"icsd_ids": {"$exists": True}, "e_above_hull": {"$lt": 0.1}, "band_g
 properties = ["material_id", "pretty_formula", "formation_energy_per_atom", "energy_per_atom", "band_gap", "total_magnetization", "volume", "density"]
 data = mpr.summary.search(criteria=criteria, property=properties)
 
-# Materials Project Compatibility 객체 생성
+# Compatibility 객체 생성
 compat = MaterialsProjectCompatibility()
 
-# 배터리 물질들의 formula를 가져오기 위한 query 작성
-# Mongodb type query가 필요
+# Mongodb type query
 query = {
     'task_ids': {'$in': ['mp-33787', 'mp-2550', 'mp-540786', 'mp-5827', 'mp-568345', 'mp-554444']},
     'nelements': {'$lte': 4},
@@ -30,7 +29,7 @@ query = {
     'icsd_ids': {'$exists': False},
 }
 
-# MPRester를 사용하여 query에 해당하는 물질들의 정보 fetch
+# query에 해당하는 물질들의 정보 fetch
 results = mpr.summary.search(query, ["task_id", "pretty_formula", "e_above_hull", "band_gap"])
 
 # 가져온 물질들의 formation energy per atom과 band gap을 Materials Project Compatibility를 사용하여 보정
@@ -40,14 +39,14 @@ for r in results:
     entry = compat.process_entry(entry)
     entries.append(entry)
 
-# PhaseDiagram 객체를 생성
+# PhaseDiagram 객체 생성
 pd = PhaseDiagram(entries)
 
-# PhaseDiagram 객체를 사용하여 PhaseDiagram plot
+# PhaseDiagram plot
 pd_plotter = PDPlotter(pd)
 pd_plotter.show()
 
-# PhaseDiagram 객체를 사용하여 Grand Potential Phase Diagram plot
+# Grand Potential Phase Diagram plot
 elements = ["Li", "Na", "K", "Mg", "Ca", "Zn", "Al", "Ti", "Fe", "Co", "Ni", "Cu"]
 plotter = PDPlotter(pd, show_unstable=True)
 plt = plotter.plot_grand_pots(chem_pot_limits={el: (-2, 2) for el in elements})
