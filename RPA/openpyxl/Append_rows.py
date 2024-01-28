@@ -1,9 +1,3 @@
-#!/usr/bin/env python3
-
-"""
-Inserting rows with the append method
-"""
-
 from openpyxl import Workbook
 
 def print_rows(ws):
